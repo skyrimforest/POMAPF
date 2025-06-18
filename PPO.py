@@ -5,7 +5,7 @@
 @Author  ：Skyrim
 @Date    ：2025/6/17 9:33 
 '''
-
+# 仅用于推理获得结果
 import torch
 import torch.nn as nn
 from pogema import GridConfig, pogema_v0

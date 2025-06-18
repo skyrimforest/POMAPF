@@ -8,7 +8,6 @@
 import heapq
 import numpy as np
 from pogema import GridConfig, pogema_v0
-from collections import deque
 
 class AStarAgent:
     def __init__(self):

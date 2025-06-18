@@ -90,8 +90,10 @@ class GreedyAgent:
 
 # 初始化环境
 seed = 43
-env = pogema_v0(GridConfig(integration="PettingZoo", num_agents=4, obs_radius=3, seed=seed))
-observations = env.reset(seed=seed)
+env = pogema_v0(GridConfig(integration="PettingZoo", num_agents=4, obs_radius=3, seed=23))
+observations = env.reset()
+print(env.agents)
+
 env.render()
 agent_map = {agent: GreedyAgent() for agent in env.agents}
 done = {agent: False for agent in env.agents}

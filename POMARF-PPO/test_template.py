@@ -1,13 +1,4 @@
-import os
-import glob
 import time
-from datetime import datetime
-
-import torch
-import numpy as np
-
-import gym
-import pybullet_envs  # 导入pybullet环境
 
 from PPO import PPO
 
@@ -17,22 +8,6 @@ def test():
     print("============================================================================================")
 
     ################## hyperparameters ##################
-
-    # env_name = "CartPole-v1"
-    # has_continuous_action_space = False
-    # max_ep_len = 400
-    # action_std = None
-
-    # env_name = "LunarLander-v2"
-    # has_continuous_action_space = False
-    # max_ep_len = 300
-    # action_std = None
-
-    # env_name = "BipedalWalker-v2"
-    # has_continuous_action_space = True
-    # max_ep_len = 1500           # max timesteps in one episode
-    # action_std = 0.1            # set same std for action distribution which was used while saving
-
     env_name = "Walker2DBulletEnv-v0"  # PyBullet中的类似环境
     has_continuous_action_space = True
     max_ep_len = 1000           # max timesteps in one episode
