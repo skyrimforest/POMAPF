@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 import torch.nn as nn
 from torch.distributions import MultivariateNormal
@@ -256,4 +257,75 @@ class PPO:
     def load(self, checkpoint_path):
         self.policy_old.load_state_dict(torch.load(checkpoint_path, map_location=lambda storage, loc: storage))
         self.policy.load_state_dict(torch.load(checkpoint_path, map_location=lambda storage, loc: storage))
-        
+
+
+class PPOAgent:
+    def __init__(self, state_dim, action_dim,eps=0.1, alpha=0.1, gamma=0.9,lr_actor = 0.0003,lr_critic = 0.001,K_epochs = 80,eps_clip = 0.2,has_continuous_action_space = False,action_std = 0.6):
+        self.ppo_agent = PPO(state_dim, action_dim, lr_actor, lr_critic, gamma, K_epochs, eps_clip, has_continuous_action_space,
+                    action_std)
+        self.eps = eps
+        self.alpha = alpha
+        self.gamma = gamma
+        self.prev_state = None
+        self.prev_action = None
+        self.prev_pos = (3, 3)  # 相对坐标固定为中心
+        self.prev_goal_dist = None
+        self.strike_time = 1
+        print("PPO K epochs : ", K_epochs)
+        print("PPO epsilon clip : ", eps_clip)
+        print("discount factor (gamma) : ", gamma)
+        print("--------------------------------------------------------------------------------------------")
+        print("optimizer learning rate actor : ", lr_actor)
+        print("optimizer learning rate critic : ", lr_critic)
+
+    def compute_reward(self, obs_tensor, action):
+        agent_pos = (3, 3)
+        goal_pos = np.argwhere(obs_tensor[2] == 1)
+
+        gy, gx = goal_pos[0]
+        new_pos = {
+            0: agent_pos,
+            1: (agent_pos[0] - 1, agent_pos[1]),
+            2: (agent_pos[0] + 1, agent_pos[1]),
+            3: (agent_pos[0], agent_pos[1] - 1),
+            4: (agent_pos[0], agent_pos[1] + 1),
+        }[action]
+        new_dist = abs(gy - new_pos[0]) + abs(gx - new_pos[1])
+        print(new_dist)
+        # 第一次记录目标距离
+        if self.prev_goal_dist is None:
+            self.prev_goal_dist = abs(gy - agent_pos[0]) + abs(gx - agent_pos[1])
+            self.prev_pos = agent_pos
+            return 0.0
+
+        # 奖励逻辑
+        if new_pos == self.prev_pos:
+            reward = -0.2
+        elif new_dist <= 1e-5:
+            reward=3
+        elif new_dist < self.prev_goal_dist:
+            reward = 0.3
+        elif new_dist >= self.prev_goal_dist:
+            reward = -0.4
+        else:
+            reward = -0.05 * self.strike_time  # 平移但距离不变
+
+        self.prev_goal_dist = new_dist
+        self.prev_pos = new_pos
+        return reward
+
+    def select_action(self,state_tensor):
+        return self.ppo_agent.select_action(state_tensor)
+
+    @property
+    def buffer(self):
+        return self.ppo_agent.buffer
+
+    def update(self):
+        self.ppo_agent.update()
+
+    def decay_action_std(self,action_std_decay_rate, min_action_std):
+        return self.ppo_agent.decay_action_std(action_std_decay_rate, min_action_std)
+
+    def save(self,checkpoint_path):
+        return self.ppo_agent.save(checkpoint_path)

@@ -1,36 +1,39 @@
+import matplotlib
 import matplotlib.pyplot as plt
-import numpy as np
+import seaborn as sns
 
-# 示例：3 个算法的 4 种指标
-algorithms = ['Baseline', 'A*-FOV', 'RL-Policy', "PPO"]
-completion_rate = [0.85, 0.92, 0.88]  # 完成率 (0~1)
-makespan = [120, 100, 110]  # Makespan (越小越好)
-soc = [1500, 1200, 1300]  # Sum of Costs
-collisions = [12, 3, 7]  # 冲突次数 (越小越好)
+matplotlib.use('TkAgg')  # Use 'TkAgg' or 'Qt5Agg' backend if available
+sns.set(style="whitegrid", palette="muted", font_scale=1.2)
 
-# 组合数据
-metrics = ['完成率', 'Makespan', 'Sum of Costs', '冲突次数']
-data = [completion_rate, makespan, soc, collisions]
+# Algorithm names
+algorithms = ['Greedy', 'A*-FOV', 'RL-Policy', 'PPO']
 
-# 设置柱状图参数
-x = np.arange(len(algorithms))  # X轴分组数量
-width = 0.2  # 每个柱的宽度
+# Simulated data (replace with actual experiment results)
+completion_rate = [0.62, 0.85, 0.92, 0.95]
+makespan = [85, 63, 48, 45]
+sum_of_costs = [210, 180, 160, 150]
+collision_count = [22, 8, 3, 2]
 
-# 创建图形和子图
-fig, ax = plt.subplots(figsize=(10, 6))
+# Create subplots
+fig, axs = plt.subplots(2, 2, figsize=(12, 8))
+fig.suptitle("Performance Comparison of Algorithms in POMARF", fontsize=16)
 
-# 绘制每个指标的柱状图
-for i, metric_data in enumerate(data):
-    ax.bar(x + i * width, metric_data, width, label=metrics[i])
+# Define metrics (title, data, unit, axis)
+metrics = [
+    ("Completion Rate", completion_rate, "%", axs[0, 0]),
+    ("Makespan", makespan, "Steps", axs[0, 1]),
+    ("Sum of Costs", sum_of_costs, "Total Steps", axs[1, 0]),
+    ("Number of Collisions", collision_count, "Times", axs[1, 1]),
+]
 
-# 设置 X 轴和标签
-ax.set_xticks(x + width * 1.5)
-ax.set_xticklabels(algorithms, fontsize=12)
-ax.set_ylabel('指标数值', fontsize=12)
-ax.set_title('多种算法下的 PO-MAPF 性能指标对比', fontsize=14)
-ax.legend(fontsize=10)
-ax.grid(True, linestyle='--', alpha=0.5)
+# Plotting each metric
+for title, data, unit, ax in metrics:
+    sns.barplot(x=algorithms, y=data, ax=ax, hue=algorithms, dodge=False)
+    ax.set_title(title)
+    ax.set_ylabel(unit)
+    ax.set_xlabel("")
+    ax.set_ylim(0, max(data) * 1.2)
+    ax.bar_label(ax.containers[0], fmt="%.2f" if "Rate" in title else "%d")
 
-# 展示图表
-plt.tight_layout()
+plt.tight_layout(rect=[0, 0, 1, 0.95])
 plt.show()
